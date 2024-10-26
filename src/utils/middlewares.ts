@@ -5,23 +5,30 @@ import TUserRepo from "../repositories/type_user_repo";
 import { JwtPayload } from "../models/jwt_payload";
 import config from "../infra/config";
 
-export const basicAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'] || '';
+export const basicAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+      throw next(new HttpException(401, "Invalid Token"));
+    }
 
-  const base64Credentials = authHeader.split(' ')[1];
-  const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
-  const [username, password] = credentials.split(':');
+    const base64Credentials = authHeader.split(' ')[1];
+    const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+    const [username, password] = credentials.split(':');
 
-  if (username !== config.BASIC_AUTH_USERNAME) {
-    throw new HttpException(401, "Credentials is invalid");
+    if (username !== config.BASIC_AUTH_USERNAME) {
+      throw new HttpException(401, "Credentials is invalid");
+    }
+    if (password !== config.BASIC_AUTH_PASSWORD) {
+      throw new HttpException(401, "Credentials is invalid");
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
-  if (password !== config.BASIC_AUTH_PASSWORD) {
-    throw new HttpException(401, "Credentials is invalid");
-  }
-  next();
 };
 
-export const jwtAuthMiddleware = (req: Request, res: Response, next: NextFunction, repo: TUserRepo) => {
+export const jwtAuthMiddleware = async (req: Request, res: Response, next: NextFunction, repo: TUserRepo) => {
   try {
     const authHeader = req.headers['authorization'];
     if (!authHeader) {
@@ -29,12 +36,12 @@ export const jwtAuthMiddleware = (req: Request, res: Response, next: NextFunctio
     }
 
     const token = authHeader.split(' ')[1];
-    const decode = jwt.verify(token, config.JWTPRIVATEKEY) as JwtPayload;
+    const decode = await jwt.verify(token, config.JWTPRIVATEKEY) as JwtPayload;
     if (!decode) {
       throw next(new HttpException(400, "Invalid Token"));
     }
 
-    const user = repo.findOne({
+    const user = await repo.findOne({
       email: decode.email
     });
     if (!user) {

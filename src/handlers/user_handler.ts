@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { LoginInput, SignupInput } from "../models/user_models";
 import { UserUsecase } from "../usecases/user_usecase";
 import { responseSuccess } from "../utils/wrapper";
+import { SwipeInput } from "../models/swipe_models";
 
 class UserHandler {
   private readonly userUsecase: UserUsecase;
@@ -36,6 +37,19 @@ class UserHandler {
       next(error);
     }
   }
-}
+
+  async swipe(req: Request, res: Response, next: NextFunction) {
+    try {
+      const request: SwipeInput = {
+        status: req.body.status,
+        swipedUserId: req.body.swipedUserId,
+        swiperId: req.body.users.id
+      };
+      const result = await this.userUsecase.swipe(request);
+      responseSuccess(res, 201, "Horray request successfully created", result);
+    } catch (error) {
+      next(error);
+    }
+  }}
 
 export default UserHandler;
