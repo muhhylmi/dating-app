@@ -12,3 +12,44 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  password    String
+  name        String
+  birthdate   String
+  gender      String
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  Premium     Premium?
+
+  @@map("users")
+}
+
+model Premium {
+  id               Int     @id @default(autoincrement())
+  userId           Int     @unique
+  hasNoSwipeLimit  Boolean @default(false)
+  User             User    @relation(fields: [userId], references: [id])
+
+  @@map("premium")
+}
+
+model Swipe {
+  id           Int      @id @default(autoincrement())
+  swiperId     Int
+  swipedUserId Int
+  status       SwipeStatus
+  createdAt    DateTime @default(now())
+
+  @@unique([swiperId, swipedUserId, createdAt])
+
+  @@map("swipe")
+}
+
+enum SwipeStatus {
+    LIKE
+    PASS
+}
