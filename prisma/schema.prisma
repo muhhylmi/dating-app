@@ -22,6 +22,7 @@ model User {
   gender      String
   isVerified  Boolean  @default(false)
   createdAt   DateTime @default(now())
+  isDeleted   Boolean @default(false)
 
   Premium     Premium?
 
@@ -33,6 +34,7 @@ model Premium {
   userId           Int     @unique
   hasNoSwipeLimit  Boolean @default(false)
   User             User    @relation(fields: [userId], references: [id])
+  isDeleted   Boolean @default(false)
 
   @@map("premium")
 }
@@ -43,6 +45,7 @@ model Swipe {
   swipedUserId Int
   status       SwipeStatus
   createdAt    DateTime @default(now())
+  isDeleted   Boolean @default(false)
 
   @@unique([swiperId, swipedUserId, createdAt])
 
