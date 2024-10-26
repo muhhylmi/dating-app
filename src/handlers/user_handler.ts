@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { LoginInput, SignupInput } from "../models/user_models";
+import { LoginInput, SignupInput, UserModel } from "../models/user_models";
 import { UserUsecase } from "../usecases/user_usecase";
 import { responseSuccess } from "../utils/wrapper";
 import { SwipeInput } from "../models/swipe_models";
@@ -33,6 +33,23 @@ class UserHandler {
         password: req.body.password
       };
       const result = await this.userUsecase.login(request);
+      responseSuccess(res, 201, "Horray request successfully created", result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async swipeList(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { users } = req.body;
+      const request: UserModel = {
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        birthDate: users.birthDate,
+        gender: users.gender
+      };
+      const result = await this.userUsecase.swipeList(request);
       responseSuccess(res, 201, "Horray request successfully created", result);
     } catch (error) {
       next(error);

@@ -5,4 +5,5 @@ export type TSwipeRepo = {
     create:(req: SwipeModel)=> Promise<SwipeResponse>
     count:(req: object) => Promise<number>
     findOne: (req: object) => Promise<SwipeResponse>
+    findMany: (req: object) => Promise<SwipeResponse[]>
 };

@@ -39,5 +39,9 @@ router.post('/api/purchase-premium',
   (req, res, next) => jwtAuthMiddleware(req, res, next, userRepo),
   (req, res, next) => handler.purchasePremium(req, res, next)
 );
+router.get('/api/swipe-list',
+  (req, res, next) => jwtAuthMiddleware(req, res, next, userRepo),
+  (req, res, next) => handler.swipeList(req, res, next)
+);
 
 export default router;

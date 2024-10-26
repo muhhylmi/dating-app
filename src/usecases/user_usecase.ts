@@ -1,4 +1,4 @@
-import { LoginInput, SignupInput, UserResponse } from "../models/user_models";
+import { LoginInput, SignupInput, UserModel, UserResponse } from "../models/user_models";
 import TUserRepo from "../repositories/type_user_repo";
 import bcrypt from 'bcrypt';
 import { HttpException } from "../utils/exception";
@@ -72,6 +72,25 @@ export class UserUsecase {
     } catch (error) {
       throw new HttpException(400, "Something error: " + error);
     }     
+  }
+
+  async swipeList(req: UserModel): Promise<UserResponse[]> {
+    const alreadySwipedToday = await this.swipeRepo.findMany({
+      swiperId: req.id,
+      createdAt: {
+        gte: new Date(new Date().setHours(0, 0, 0, 0))
+      },
+    });
+
+    return await this.repository.findMany(
+      {
+        gender: {
+          not: req.gender
+        },
+        id: {
+          notIn: alreadySwipedToday.map(val => val?.id)
+        }
+      });
   }
 
   async swipe(req: SwipeInput): Promise<SwipeResponse> {

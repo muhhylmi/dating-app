@@ -33,4 +33,18 @@ export class SwipeRepo implements TSwipeRepo {
     });
     return swipeCount;
   }
+
+  async findMany(query: object): Promise<SwipeResponse[]> {
+    const swipes = await this.prisma.swipe.findMany({
+      where: { isDeleted: false, ...query }
+    });
+    return swipes.map(swipe => {
+      return {
+        id: swipe.id,
+        status: swipe.status,
+        swipedUserId: swipe.swipedUserId,
+        swiperId: swipe.swiperId
+      };
+    });
+  }
 }
