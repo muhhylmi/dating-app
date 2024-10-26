@@ -11,7 +11,7 @@ const userUsecase: UserUsecase = new UserUsecase(userRepo);
 const handler = new UserHandler(userUsecase);
 
 router.post('/api/signup', 
-  (req, res) => handler.signup(req, res)
+  (req, res, next) => handler.signup(req, res, next)
 );
 
 export default router;
