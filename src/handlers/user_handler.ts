@@ -33,7 +33,7 @@ class UserHandler {
         password: req.body.password
       };
       const result = await this.userUsecase.login(request);
-      responseSuccess(res, 201, "Horray request successfully created", result);
+      responseSuccess(res, 200, "Horray request successfully created", result);
     } catch (error) {
       next(error);
     }
@@ -50,7 +50,7 @@ class UserHandler {
         gender: users.gender
       };
       const result = await this.userUsecase.swipeList(request);
-      responseSuccess(res, 201, "Horray request successfully created", result);
+      responseSuccess(res, 200, "Horray request successfully created", result);
     } catch (error) {
       next(error);
     }

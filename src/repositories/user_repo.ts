@@ -49,8 +49,7 @@ export class UserRepo implements TUserRepo {
         email: user.email,
         name: user.email,
         gender: user.gender,
-        birthDate: user.birthdate,
-        password: user.password
+        birthDate: user.birthdate
       };
     });
   }
