@@ -3,6 +3,7 @@ import { LoginInput, SignupInput } from "../models/user_models";
 import { UserUsecase } from "../usecases/user_usecase";
 import { responseSuccess } from "../utils/wrapper";
 import { SwipeInput } from "../models/swipe_models";
+import { PremiumModel } from "../models/premium_models";
 
 class UserHandler {
   private readonly userUsecase: UserUsecase;
@@ -46,6 +47,19 @@ class UserHandler {
         swiperId: req.body.users.id
       };
       const result = await this.userUsecase.swipe(request);
+      responseSuccess(res, 201, "Horray request successfully created", result);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async purchasePremium(req: Request, res: Response, next: NextFunction) {
+    try {
+      const request: PremiumModel = {
+        hasNoSwipeLimit: true,
+        userId: req.body.users.id
+      };
+      const result = await this.userUsecase.purchasePremium(request);
       responseSuccess(res, 201, "Horray request successfully created", result);
     } catch (error) {
       next(error);

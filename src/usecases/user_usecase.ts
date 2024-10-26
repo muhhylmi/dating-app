@@ -7,6 +7,7 @@ import config from "../infra/config";
 import { SwipeInput, SwipeResponse } from "../models/swipe_models";
 import { TSwipeRepo } from "../repositories/type_swipe_repo";
 import { TPremiumRepo } from "../repositories/type_premium_repo";
+import { PremiumModel, PremiumResponse } from "../models/premium_models";
 
 export class UserUsecase {
   private readonly repository: TUserRepo;
@@ -103,5 +104,17 @@ export class UserUsecase {
     });
 
     return swipe;
+  }
+
+  async purchasePremium(req: PremiumModel): Promise<PremiumResponse> {
+    const existsPremium = await this.premiumRepo.findOne({
+      userId: req.userId,
+      hasNoSwipeLimit: true
+    });
+    if (existsPremium) {
+      throw new HttpException(400, "User already registered in premium member");
+    }
+    const newPremium = await this.premiumRepo.create(req);
+    return newPremium;
   }
 }

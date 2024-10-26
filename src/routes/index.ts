@@ -35,5 +35,9 @@ router.post('/api/swipe',
   validate(swipeSchema),
   (req, res, next) => handler.swipe(req, res, next)
 );
+router.post('/api/purchase-premium',
+  (req, res, next) => jwtAuthMiddleware(req, res, next, userRepo),
+  (req, res, next) => handler.purchasePremium(req, res, next)
+);
 
 export default router;
