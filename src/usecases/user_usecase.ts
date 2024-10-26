@@ -1,4 +1,4 @@
-import { UserModel } from "../models/user_models";
+import { SignupInput, UserModel } from "../models/user_models";
 import TUserRepo from "../repositories/type_user_repo";
 import bcrypt from 'bcrypt';
 
@@ -8,7 +8,7 @@ export class UserUsecase {
     this.repository = repository;
   }
 
-  async signup(user: UserModel): Promise<UserModel> {
+  async signup(user: SignupInput): Promise<UserModel> {
     const hashedPassword = await bcrypt.hash(user.password, 10);
     user.password = hashedPassword;
     return await this.repository.create(user);
