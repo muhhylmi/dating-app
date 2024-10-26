@@ -1,40 +1,50 @@
-import { NextFunction, Request, Response } from 'express';
-import { AnyZodObject, ZodError } from 'zod';
-import { responseError } from './wrapper';
+import { NextFunction, Request, Response } from "express";
+import { HttpException } from "./exception";
+import jwt from 'jsonwebtoken';
+import TUserRepo from "../repositories/type_user_repo";
+import { JwtPayload } from "../models/jwt_payload";
+import config from "../infra/config";
 
-export const validate = (schema: AnyZodObject) => (req: Request, res: Response, next: NextFunction) => {
+export const basicAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'] || '';
+
+  const base64Credentials = authHeader.split(' ')[1];
+  const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+  const [username, password] = credentials.split(':');
+
+  if (username !== config.BASIC_AUTH_USERNAME) {
+    throw new HttpException(401, "Credentials is invalid");
+  }
+  if (password !== config.BASIC_AUTH_PASSWORD) {
+    throw new HttpException(401, "Credentials is invalid");
+  }
+  next();
+};
+
+export const jwtAuthMiddleware = (req: Request, res: Response, next: NextFunction, repo: TUserRepo) => {
   try {
-    schema.parse(req.body);
-    next(); 
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return responseError(res, 400, error.errors.map(e => e.path + " " + e.message));
+    const authHeader = req.headers['authorization'];
+    if (!authHeader) {
+      throw next(new HttpException(401, "Invalid Token"));
     }
+
+    const token = authHeader.split(' ')[1];
+    const decode = jwt.verify(token, config.JWTPRIVATEKEY) as JwtPayload;
+    if (!decode) {
+      throw next(new HttpException(400, "Invalid Token"));
+    }
+
+    const user = repo.findOne({
+      email: decode.email
+    });
+    if (!user) {
+      throw new HttpException(400, "Invalid Token");
+    }
+
+    req.body.users = user;
+
+    next();
+  } catch (error) {
     next(error);
   }
 };
-  
-export const validateParams = (schema: AnyZodObject) => (req: Request, res: Response, next: NextFunction) => {
-  try {
-    schema.parse(req.params);
-    next(); 
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return responseError(res, 400, error.errors.map(e => e.path + " " + e.message));
-    }
-    next(error);
-  }
-};
-  
-export const validateQueries = (schema: AnyZodObject) => (req: Request, res: Response, next: NextFunction) => {
-  try {
-    schema.parse(req.query);
-    next(); 
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return responseError(res, 400, error.errors.map(e => e.path + " " + e.message));
-    }
-    next(error);
-  }
-};
-  

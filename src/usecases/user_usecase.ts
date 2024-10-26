@@ -45,7 +45,7 @@ export class UserUsecase {
       }
             
       const token = jwt.sign({
-        username: user.name,
+        name: user.name,
         userId: user.id,
         email: user.email,
         gender: user.gender,
@@ -54,7 +54,7 @@ export class UserUsecase {
     
       return {
         accessToken: token,
-        username: user.name,
+        name: user.name,
         userId: user.id,
         email: user.email,
         gender: user.gender,
