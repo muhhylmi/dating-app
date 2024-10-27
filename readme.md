@@ -128,7 +128,7 @@ Response Body
 }
 ```
 
-## Swipe
+## Purchase Premium
 
 Endpoint : POST /api/purchase-premium
 
