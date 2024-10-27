@@ -11,6 +11,7 @@ import { TSwipeRepo } from '../src/repositories/type_swipe_repo';
 import { SwipeRepo } from '../src/repositories/swipe_repo';
 import { jwtAuthMiddleware } from "../src/utils/middlewares";
 import errorHandler from '../src/utils/error';
+import { checkIntegrationUser, deleteTestPremium, deleteTestSwipe, deleteTestUser, getBasicCredentials, getToken } from './helper';
 
 
 const prisma = new PrismaClient();
@@ -21,7 +22,8 @@ const swipeRepo: TSwipeRepo = new SwipeRepo(prisma);
 
 const userUsecase: UserUsecase = new UserUsecase(userRepo, swipeRepo, premiumRepo);
 const userHandler = new UserHandler(userUsecase);
-let token;
+let token: string;
+let credentials: string;
 
 const app = express();
 app.use(express.json());
@@ -41,50 +43,18 @@ app.post('/api/purchase-premium',
 );
 app.use(errorHandler);
 
-const username = 'admin';
-const password = 'password';
-const encodeCredentials = (username, password) => {
-  return Buffer.from(`${username}:${password}`).toString('base64');
-};
-const credentials = encodeCredentials(username, password);
+
 jest.mock('../src/utils/logger'); // Mock logger supaya tidak perlu logging saat test dijalankan
 
 
 
 beforeAll(async () => {
-  await prisma.premium.deleteMany({
-    where: {
-      User: {
-        email: {
-          contains: 'test'
-        }
-      }
-    }
-  });
-
-  await prisma.swipe.deleteMany({
-    where: {
-      swipedUserId: 3,
-      swiperId: 6
-    }
-  });
-  await prisma.user.deleteMany({
-    where: { email: {
-      contains: 'test'
-    }}
-  }); // Kosongkan tabel user sebelum memulai tes
-  
-  const responseLogin = await request(app)
-    .post("/api/login")
-    .set('authorization', `Basic ${credentials}`)
-    .send(
-      {
-        "email": "integration@mail.com",
-        "password": "password"
-      }
-    );
-    
-  token = responseLogin.body.data.accessToken;
+  await checkIntegrationUser(prisma);
+  await deleteTestPremium(prisma);
+  await deleteTestSwipe(prisma);
+  await deleteTestUser(prisma);
+  credentials = await getBasicCredentials();
+  token = await getToken(app);
 });
   
 afterAll(async () => {
