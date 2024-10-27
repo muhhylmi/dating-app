@@ -1,6 +1,5 @@
 import request from 'supertest';
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
 import UserHandler  from '../src/handlers/user_handler';
 import { UserRepo }  from '../src/repositories/user_repo';
 import TUserRepo  from '../src/repositories/type_user_repo';
@@ -12,13 +11,19 @@ import { SwipeRepo } from '../src/repositories/swipe_repo';
 import { jwtAuthMiddleware } from "../src/utils/middlewares";
 import errorHandler from '../src/utils/error';
 import { checkIntegrationUser, deleteTestPremium, deleteTestSwipe, deleteTestUser, getBasicCredentials, getToken } from './helper';
+import { TDatabases } from '../src/infra/databases';
+import { PrismaClient } from '@prisma/client';
 
 
-const prisma = new PrismaClient();
-
-const userRepo: TUserRepo = new UserRepo(prisma);
-const premiumRepo: TPremiumRepo = new PremiumRepo(prisma);
-const swipeRepo: TSwipeRepo = new SwipeRepo(prisma);
+const db: TDatabases = {
+  getSqlClient() {
+    return new PrismaClient();
+  },
+};
+const userRepo: TUserRepo = new UserRepo(db);
+const premiumRepo: TPremiumRepo = new PremiumRepo(db);
+const swipeRepo: TSwipeRepo = new SwipeRepo(db);
+const prisma = db.getSqlClient();
 
 const userUsecase: UserUsecase = new UserUsecase(userRepo, swipeRepo, premiumRepo);
 const userHandler = new UserHandler(userUsecase);

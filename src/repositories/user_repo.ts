@@ -1,11 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { UserModel, UserResponse } from "../models/user_models";
 import TUserRepo from "./type_user_repo";
+import { TDatabases } from "../infra/databases";
 
 export class UserRepo implements TUserRepo {
   private readonly prisma: PrismaClient;
-  constructor(prisma: PrismaClient){
-    this.prisma = prisma;
+  constructor(db: TDatabases){
+    this.prisma = db.getSqlClient();
   }
 
   async create(user: UserModel): Promise<UserResponse> {

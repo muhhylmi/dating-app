@@ -1,11 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 import { TSwipeRepo } from "./type_swipe_repo";
 import { SwipeModel, SwipeResponse } from "../models/swipe_models";
+import { TDatabases } from "../infra/databases";
 
 export class SwipeRepo implements TSwipeRepo {
   private readonly prisma: PrismaClient;
-  constructor(prisma: PrismaClient){
-    this.prisma = prisma;
+  constructor(db: TDatabases){
+    this.prisma = db.getSqlClient();
   }
 
   async create(swipe: SwipeModel): Promise<SwipeResponse> {

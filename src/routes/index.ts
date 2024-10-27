@@ -3,7 +3,6 @@ import UserHandler from "../handlers/user_handler";
 import { UserUsecase } from "../usecases/user_usecase";
 import TUserRepo from "../repositories/type_user_repo";
 import { UserRepo } from "../repositories/user_repo";
-import prisma from "../utils/prisma";
 import { validate } from "../utils/validation";
 import { loginSchema, signupSchema } from "../models/user_models";
 import { basicAuthMiddleware, jwtAuthMiddleware } from "../utils/middlewares";
@@ -12,11 +11,13 @@ import { SwipeRepo } from "../repositories/swipe_repo";
 import { TPremiumRepo } from "../repositories/type_premium_repo";
 import { PremiumRepo } from "../repositories/premium_repo";
 import { swipeSchema } from "../models/swipe_models";
+import {Databases, TDatabases} from "../infra/databases";
 
 const router = Router();
-const userRepo: TUserRepo = new UserRepo(prisma);
-const swipeRepo: TSwipeRepo = new SwipeRepo(prisma);
-const premiumRepo: TPremiumRepo = new PremiumRepo(prisma);
+const db:TDatabases = new Databases();
+const userRepo: TUserRepo = new UserRepo(db);
+const swipeRepo: TSwipeRepo = new SwipeRepo(db);
+const premiumRepo: TPremiumRepo = new PremiumRepo(db);
 const userUsecase: UserUsecase = new UserUsecase(userRepo, swipeRepo, premiumRepo);
 const handler = new UserHandler(userUsecase);
 
